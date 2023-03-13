@@ -39,5 +39,30 @@
             ];
           };
       });
+      defaultPackage = forAllSystems ({ pkgs, system }: {
+        ${system} =
+          let
+            python-with-deps = pkgs.python310.withPackages (ps: with ps; [
+                # ipython
+                # python-lsp-server
+                openai
+                python-dotenv
+              ]);
+            in
+              pkgs.stdenv.mkDerivation rec {
+                name = "gpt-cli";
+                src = ./gpt-cli;
+                phases = [ "installPhase" ];
+
+                installPhase = ''
+                    runHook preInstall
+                    mkdir -p $out/bin
+                    echo "#!${python-with-deps}/bin/python3" > $out/bin/gpt-cli
+                    cat $src >> $out/bin/gpt-cli
+                    chmod +x $out/bin/gpt-cli
+                    runHook postInstall
+                    '';
+              };
+      });
     };
 }
