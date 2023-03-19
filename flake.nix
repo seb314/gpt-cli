@@ -32,11 +32,14 @@
             runHook postInstall
           '';
         };
+        app = {type = "app"; program = "${package}/bin/gpt-cli";};
       in {
         devShells.default = devShellDefault;
         devShell = devShellDefault; # add the same under another path because nix-direnv or nix versions seem to expect different paths, or so
 
         packages.default = package;
-        apps.default = {type = "app"; program = "${package}/bin/gpt-cli";};
+        defaultPackage = package;
+        apps.default = app;
+        defaultApp = app; # alias for older nix version (or so)
       });
 }
